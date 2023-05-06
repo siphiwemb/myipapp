@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - myipapp_volume:/app
+    depends_on:
+      - myipapp
+
+
+  myipapp:
+    build: .
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    command: uwsgi --ini /app/uwsgi.ini
+    volumes:
+      - myipapp_volume:/app
+    depends_on:
+      - mongodb_container
+
+
+  mongodb_container:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+
+volumes:
+  myipapp_volume:
+  mongo_data:
